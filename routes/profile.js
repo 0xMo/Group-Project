@@ -9,7 +9,7 @@ const sqlite = require("../models/sqlite");
 router.get("/", (req, res) => {
   let token = insecurity.verify(req.cookies.token);
   let cart = new Cart(req.cookies.cart ? req.cookies.cart : {});
-  
+
   sqlite.getUserDetails(token.userID, (err, userDetails) => {
     sqlite.getUserPaymentDetails(token.userID, (err, userPaymentDetails) => {
         sqlite.getOrderHistory(token.userID, (err, orders) => {
@@ -30,11 +30,11 @@ router.get("/", (req, res) => {
       });
     });
   });
-  
+
 router.post("/update-profile", (req, res) => {
   let cart = new Cart(req.cookies.cart ? req.cookies.cart : {});
   let token = insecurity.verify(req.cookies.token);
-  
+
   let username = req.body.username;
   let email = req.body.email;
   let password = req.body.password;
@@ -52,14 +52,14 @@ router.post("/update-profile", (req, res) => {
     sqlite.getUserDetails(token.userID, (getUserDetailsError, userDetails) => {
       if (password === userDetails.password) {
       } else {
-        password = insecurity.hash(password);     
+        password = insecurity.hash(password);
       }
       sqlite.updateProfile(username, email, password, token.userID, (err, result) => {
       if (err) {
           if (err.errno == 19) {
             error = "Username is already taken";
           } else {
-            error = err;          
+            error = err;
           }
           sqlite.getUserDetails(token.userID, (getUserDetailsError, userDetails) => {
             sqlite.getUserPaymentDetails(token.userID, (getPaymentDetailsError, userPaymentDetails) => {
@@ -83,7 +83,7 @@ router.post("/update-profile", (req, res) => {
         } else {
           res.redirect("/profile");
         }
-      }); 
+      });
     });
   }
   if (error !== null) {
@@ -120,7 +120,7 @@ router.post("/update-payment", (req, res) => {
   let cardNo = req.body.cardNo;
   let expiration = req.body.expiration;
   let cvc = req.body.cvc;
-  
+
   let error = null;
   if (name === "") {
     name = null;
@@ -136,7 +136,7 @@ router.post("/update-payment", (req, res) => {
     error = "Invalid Payment information: Invalid CVC";
   } else if (validate.isExpiration(expiration) === false) {
     error = "Invalid Payment information: Invalid expiration (please use the format MM/YY)";
-  } 
+  }
 
   if (error === null) {
     sqlite.updatePaymentDetails(name, phoneNo, address, cardName, cardNo, expiration, cvc, token.userID, (err, result) => {
@@ -168,5 +168,5 @@ router.post("/update-payment", (req, res) => {
     });
   }
 });
-  
+
 module.exports = router;
